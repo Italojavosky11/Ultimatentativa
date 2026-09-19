@@ -6,7 +6,7 @@ using UnityEngine;
 
 public static class SaveSystem
 {
-    private static readonly string EncryptionKey = "ChaveSecretaDe32CaracteresAqui!"; // 32 caracteres (256 bits)
+    private static readonly string EncryptionKey = "ChaveSecretaDe32CaracteresAqui!!"; // 32 caracteres (256 bits)
 
     public static void SaveSlot(int slotIndex, GameData data)
     {

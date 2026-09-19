@@ -163,8 +163,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f15c0e9697e984647a9b054809b1cef7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
-  coinEventChannel: {fileID: 0}
-  gameEventChannel: {fileID: 0}
+  coinEventChannel: {fileID: 11400000, guid: 25fbf7ec0cf0f0049b309b2c0d88fe5c, type: 2}
+  gameEventChannel: {fileID: 11400000, guid: efb7d522d65fd1b48a1db5d1f48e93df, type: 2}
 --- !u!1 &846016537
 GameObject:
   m_ObjectHideFlags: 0

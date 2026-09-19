@@ -1,8 +1,10 @@
 using UnityEngine;
+using UnityEngine.InputSystem; // <-- ADICIONADO PARA RECONHECER O 'Keyboard'
 using TMPro;
 
 public class VictoryZone3D : MonoBehaviour
 {
+    [Header("UI & Eventos")]
     [SerializeField] private GameObject victoryPanelUI;
     [SerializeField] private TextMeshProUGUI victoryText;
     [SerializeField] private int totalCoinsInLevel = 5;
@@ -15,37 +17,49 @@ public class VictoryZone3D : MonoBehaviour
         if (other.CompareTag("Player") && !isVictory)
         {
             isVictory = true;
-            Time.timeScale = 0f; // Pausa o jogo ao vencer
-
+            Time.timeScale = 0f; // Pausa a simulação ao vencer
+            
             int coins = GameManager.Instance.CurrentCoins;
-            victoryText.text = $"Fase Concluída!\nMoedas: {coins}/{totalCoinsInLevel}\nPressione [ESPAÇO] para Continuar";
-            victoryPanelUI.SetActive(true);
+            if (victoryText != null)
+            {
+                victoryText.text = $"Fase Concluída!\nMoedas: {coins}/{totalCoinsInLevel}\nPressione [ESPAÇO] para Continuar";
+            }
 
-            // Autosave de final de fase no Slot 0
-            gameEventChannel.RaiseLevelCompleted();
+            if (victoryPanelUI != null)
+            {
+                victoryPanelUI.SetActive(true);
+            }
+
+            // Notifica os canais e executa o Autosave de vitória no Slot 0
+            if (gameEventChannel != null)
+            {
+                gameEventChannel.RaiseLevelCompleted();
+            }
             SaveSystem.SaveSlot(0, GameManager.Instance.CurrentGameData);
         }
     }
 
     private void Update()
     {
-        if (isVictory && Input.GetKeyDown(KeyCode.Space))
+        // Verifica o pressionamento da tecla Espaço via Novo Input System
+        if (isVictory && Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame)
         {
-            Time.timeScale = 1f;
-            int nextLevel = GameManager.Instance.CurrentGameData.levelIndex + 1;
+            Time.timeScale = 1f; // Restaura o tempo
+            
+            int currentLevel = GameManager.Instance.CurrentGameData.levelIndex;
 
-            // Prepara dados da próxima fase
-            GameManager.Instance.CurrentGameData.levelIndex = nextLevel;
-            GameManager.Instance.CurrentGameData.hasReachedCheckpoint = false;
-            GameManager.Instance.CurrentGameData.coinsAtCheckpoint = 0;
-            GameManager.Instance.CurrentGameData.collectedCoinIDs.Clear();
-            GameManager.Instance.CurrentCoins = 0;
-
-            if (nextLevel <= 2)
+            // Se estiver na Fase 1, prepara e carrega a Fase 2
+            if (currentLevel == 1)
             {
-                UnityEngine.SceneManagement.SceneManager.LoadScene($"Level_{nextLevel}");
+                GameManager.Instance.CurrentGameData.levelIndex = 2;
+                GameManager.Instance.CurrentGameData.hasReachedCheckpoint = false;
+                GameManager.Instance.CurrentGameData.coinsAtCheckpoint = 0;
+                GameManager.Instance.CurrentGameData.collectedCoinIDs.Clear();
+                GameManager.Instance.CurrentCoins = 0; // Reseta moedas para a nova fase
+
+                UnityEngine.SceneManagement.SceneManager.LoadScene("Level_2");
             }
-            else
+            else // Se já esteve na Fase 2 (Fim do Jogo), retorna ao Menu
             {
                 UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
             }

@@ -9,7 +9,10 @@ public class Coin3D : MonoBehaviour
     private void Start()
     {
         // Se a moeda já constava como coletada até o checkpoint salvo, desativa do cenário
-        if (GameManager.Instance != null && GameManager.Instance.CurrentGameData.collectedCoinIDs.Contains(coinID))
+        if (GameManager.Instance != null &&
+            GameManager.Instance.CurrentGameData != null &&
+            GameManager.Instance.CurrentGameData.collectedCoinIDs != null &&
+            GameManager.Instance.CurrentGameData.collectedCoinIDs.Contains(coinID))
         {
             gameObject.SetActive(false);
         }

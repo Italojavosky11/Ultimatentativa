@@ -45,8 +45,10 @@ public class GameManager : MonoBehaviour
 
     public void LoadFromData(GameData data)
     {
-        CurrentGameData = data;
-        CurrentCoins = data.coinsAtCheckpoint; // Restaura as moedas salvas no checkpoint
+        CurrentGameData = data ?? new GameData();
+        CurrentGameData.collectedCoinIDs ??= new List<int>();
+        CurrentGameData.collectedCoinIDsAtCheckpoint ??= new List<int>();
+        CurrentCoins = CurrentGameData.coinsAtCheckpoint; // Restaura as moedas salvas no checkpoint
 
         // Clona dados carregados no Slot 0 (Autosave)
         SaveSystem.SaveSlot(0, CurrentGameData);
@@ -56,6 +58,8 @@ public class GameManager : MonoBehaviour
 
     private void HandleCoinCollected(int coinID)
     {
+        CurrentGameData.collectedCoinIDs ??= new List<int>();
+
         if (!CurrentGameData.collectedCoinIDs.Contains(coinID))
         {
             CurrentGameData.collectedCoinIDs.Add(coinID);
@@ -67,9 +71,23 @@ public class GameManager : MonoBehaviour
     {
         CurrentGameData.hasReachedCheckpoint = true;
         CurrentGameData.coinsAtCheckpoint = CurrentCoins;
+        CurrentGameData.collectedCoinIDsAtCheckpoint = new List<int>(CurrentGameData.collectedCoinIDs);
 
         // Autosave no Slot 0
         SaveSystem.SaveSlot(0, CurrentGameData);
         Debug.Log("Autosave executado no Slot 0 ao atingir o Checkpoint!");
+    }
+
+    public void RestoreCheckpoint()
+    {
+        if (!CurrentGameData.hasReachedCheckpoint)
+        {
+            return;
+        }
+
+        CurrentGameData.collectedCoinIDs ??= new List<int>();
+        CurrentGameData.collectedCoinIDsAtCheckpoint ??= new List<int>();
+        CurrentGameData.collectedCoinIDs = new List<int>(CurrentGameData.collectedCoinIDsAtCheckpoint);
+        CurrentCoins = CurrentGameData.coinsAtCheckpoint;
     }
 }
