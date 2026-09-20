@@ -11,12 +11,14 @@ public class VictoryZone3D : MonoBehaviour
     [SerializeField] private GameEventChannelSO gameEventChannel;
 
     private bool isVictory = false;
+    private int completedLevelIndex;
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player") && !isVictory)
+        if (other.CompareTag("Player") && !isVictory && GameManager.Instance != null)
         {
             isVictory = true;
+            completedLevelIndex = GameManager.Instance != null ? GameManager.Instance.CurrentGameData.levelIndex : 0;
             Time.timeScale = 0f; // Pausa a simulação ao vencer
             
             int coins = GameManager.Instance.CurrentCoins;
@@ -46,17 +48,10 @@ public class VictoryZone3D : MonoBehaviour
         {
             Time.timeScale = 1f; // Restaura o tempo
             
-            int currentLevel = GameManager.Instance.CurrentGameData.levelIndex;
-
-            // Se estiver na Fase 1, prepara e carrega a Fase 2
-            if (currentLevel == 1)
+            // Se estiver na Fase 1, prepara e carrega a Fase 2.
+            if (completedLevelIndex == 1)
             {
-                GameManager.Instance.CurrentGameData.levelIndex = 2;
-                GameManager.Instance.CurrentGameData.hasReachedCheckpoint = false;
-                GameManager.Instance.CurrentGameData.coinsAtCheckpoint = 0;
-                GameManager.Instance.CurrentGameData.collectedCoinIDs.Clear();
-                GameManager.Instance.CurrentCoins = 0; // Reseta moedas para a nova fase
-
+                GameManager.Instance.PrepareNextLevel();
                 UnityEngine.SceneManagement.SceneManager.LoadScene("Level_2");
             }
             else // Se já esteve na Fase 2 (Fim do Jogo), retorna ao Menu

@@ -22,6 +22,11 @@ public class PlayerController3D : MonoBehaviour
         // Mantém o movimento funcionando mesmo se o Player Input estiver com uma
         // action map inválida ou sem uma ação chamada "Move".
         ReadKeyboardMovement();
+
+        if (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame)
+        {
+            TryJump();
+        }
     }
 
     private void ReadKeyboardMovement()
@@ -51,7 +56,15 @@ public class PlayerController3D : MonoBehaviour
     // Chamado automaticamente pelo Player Input quando a tecla de pular (Espaço) é pressionada
     public void OnJump(InputValue value)
     {
-        if (value.isPressed && isGrounded)
+        if (value.isPressed)
+        {
+            TryJump();
+        }
+    }
+
+    private void TryJump()
+    {
+        if (isGrounded)
         {
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         }

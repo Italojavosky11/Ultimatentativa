@@ -40,6 +40,7 @@ public class GameManager : MonoBehaviour
     {
         CurrentGameData = new GameData();
         CurrentCoins = 0;
+        Time.timeScale = 1f;
         SceneManager.LoadScene("Level_1");
     }
 
@@ -48,7 +49,10 @@ public class GameManager : MonoBehaviour
         CurrentGameData = data ?? new GameData();
         CurrentGameData.collectedCoinIDs ??= new List<int>();
         CurrentGameData.collectedCoinIDsAtCheckpoint ??= new List<int>();
-        CurrentCoins = CurrentGameData.coinsAtCheckpoint; // Restaura as moedas salvas no checkpoint
+
+        // O save sempre restaura o estado do checkpoint, e não moedas coletadas depois dele.
+        RestoreCheckpoint();
+        Time.timeScale = 1f;
 
         // Clona dados carregados no Slot 0 (Autosave)
         SaveSystem.SaveSlot(0, CurrentGameData);
@@ -80,14 +84,30 @@ public class GameManager : MonoBehaviour
 
     public void RestoreCheckpoint()
     {
+        CurrentGameData ??= new GameData();
+        CurrentGameData.collectedCoinIDs ??= new List<int>();
+        CurrentGameData.collectedCoinIDsAtCheckpoint ??= new List<int>();
+
         if (!CurrentGameData.hasReachedCheckpoint)
         {
+            // Sem checkpoint, o respawn/carregamento volta ao início da fase.
+            CurrentGameData.collectedCoinIDs.Clear();
+            CurrentCoins = 0;
             return;
         }
 
-        CurrentGameData.collectedCoinIDs ??= new List<int>();
-        CurrentGameData.collectedCoinIDsAtCheckpoint ??= new List<int>();
         CurrentGameData.collectedCoinIDs = new List<int>(CurrentGameData.collectedCoinIDsAtCheckpoint);
         CurrentCoins = CurrentGameData.coinsAtCheckpoint;
+    }
+
+    public void PrepareNextLevel()
+    {
+        CurrentGameData.levelIndex++;
+        CurrentGameData.hasReachedCheckpoint = false;
+        CurrentGameData.coinsAtCheckpoint = 0;
+        CurrentGameData.collectedCoinIDs.Clear();
+        CurrentGameData.collectedCoinIDsAtCheckpoint.Clear();
+        CurrentCoins = 0;
+        SaveSystem.SaveSlot(0, CurrentGameData);
     }
 }
